@@ -1,0 +1,214 @@
+EMPLOYEE:
+Question:-
+1.Find total salary per department.
+mysql> select department,sum(salary) from employee group by department;
++------------+-------------+
+| department | sum(salary) |
++------------+-------------+
+| HR         |   153000.00 |
+| Finance    |   241000.00 |
+| IT         |   356000.00 |
+| Marketing  |   155000.00 |
++------------+-------------+
+2.List departments where total salary exceeds 200000.
+mysql> select department,sum(salary) from employee group by department having sum(salary)>200000;
++------------+-------------+
+| department | sum(salary) |
++------------+-------------+
+| Finance    |   241000.00 |
+| IT         |   356000.00 |
++------------+-------------+
+3.Count number of employees in each department.
+mysql> select department,count(name) from employee group by department;
++------------+-------------+
+| department | count(name) |
++------------+-------------+
+| HR         |           3 |
+| Finance    |           4 |
+| IT         |           5 |
+| Marketing  |           3 |
++------------+-------------+
+4.List departments with more than 3 employees.
+select department,count(name) from employee group by department having count(name)>3;
++------------+-------------+
+| department | count(name) |
++------------+-------------+
+| Finance    |           4 |
+| IT         |           5 |
++------------+-------------+
+5.Find average salary by gender.
+mysql> select gender,avg(salary) from employee group by gender;
++--------+--------------+
+| gender | avg(salary)  |
++--------+--------------+
+| Female | 59571.428571 |
+| Male   | 61000.000000 |
++--------+--------------+
+6.Show gender-wise employee count, only if count is more than 5.
+mysql> select gender,count(*) from employee group by gender having count(*)>5;
++--------+----------+
+| gender | count(*) |
++--------+----------+
+| Female |        7 |
+| Male   |        8 |
++--------+----------+
+7.List departments with average salary above 60000.
+mysql> select department,avg(salary) from employee group by department having avg(salary)>60000;
++------------+--------------+
+| department | avg(salary)  |
++------------+--------------+
+| Finance    | 60250.000000 |
+| IT         | 71200.000000 |
++------------+--------------+
+8.List number of male and female employees per department.
+mysql> select department, gender,count(*) from employee group by department,gender;
++------------+--------+----------+
+| department | gender | count(*) |
++------------+--------+----------+
+| HR         | Female |        2 |
+| Finance    | Male   |        3 |
+| IT         | Male   |        3 |
+| HR         | Male   |        1 |
+| IT         | Female |        2 |
+| Marketing  | Female |        2 |
+| Finance    | Female |        1 |
+| Marketing  | Male   |        1 |
++------------+--------+----------+
+9.Find departments where the average experience is more than 7 years.
+mysql> select department,avg(experience) from employee group by department having avg(experience)>7;
++------------+-----------------+
+| department | avg(experience) |
++------------+-----------------+
+| HR         |         12.6667 |
+| IT         |          7.2000 |
+| Marketing  |          7.6667 |
++------------+-----------------+
+10.List departments where the max salary is above 70000.
+mysql> select department,max(salary) from employee group by department having max(salary)>70000;
++------------+-------------+
+| department | max(salary) |
++------------+-------------+
+| IT         |    75000.00 |
++------------+-------------+
+
+11.Find average age by department.
+mysql> select department,avg(age) from employee group by department;
++------------+----------+
+| department | avg(age) |
++------------+----------+
+| HR         |  37.6667 |
+| Finance    |  30.5000 |
+| IT         |  31.4000 |
+| Marketing  |  33.6667 |
++------------+----------+
+12.List all departments where female employees earn more than 60000 on average.
+mysql> select department,avg(salary) from employee where gender='female' group by department having avg(salary)>60000;
++------------+--------------+
+| department | avg(salary)  |
++------------+--------------+
+| IT         | 73500.000000 |
+| Finance    | 62000.000000 |
++------------+--------------+
+13.Find departments with total experience greater than 20 years.
+mysql> select department,sum(experience) from employee group by department having sum(experience)>20;
++------------+-----------------+
+| department | sum(experience) |
++------------+-----------------+
+| HR         |              38 |
+| IT         |              36 |
+| Marketing  |              23 |
++------------+-----------------+
+14.Find gender-wise average experience per department.
+mysql> select department,gender,avg(experience) from employee group by department,gender;
++------------+--------+-----------------+
+| department | gender | avg(experience) |
++------------+--------+-----------------+
+| HR         | Female |          9.0000 |
+| Finance    | Male   |          5.6667 |
+| IT         | Male   |          8.3333 |
+| HR         | Male   |         20.0000 |
+| IT         | Female |          5.5000 |
+| Marketing  | Female |          6.5000 |
+| Finance    | Female |          3.0000 |
+| Marketing  | Male   |         10.0000 |
++------------+--------+-----------------+
+15.List departments where average age is under 30.
+mysql> select department,avg(age) from employee group by department having avg(age)<30;
+Empty set (0.00 sec)
+16.Find departments where more than one female is working.
+mysql> select department,count(gender) from employee where gender='female' group by department having count(gender)>1;
++------------+---------------+
+| department | count(gender) |
++------------+---------------+
+| HR         |             2 |
+| IT         |             2 |
+| Marketing  |             2 |
++------------+---------------+ 
+17.Find departments where both male and female employees exist.
+mysql> select department from employee where gender='female' or gender='male'group by department;
++------------+
+| department |
++------------+
+| HR         |
+| Finance    |
+| IT         |
+| Marketing  |
++------------+
+18.List departments with highest average experience.
+mysql> select department,avg(experience) from employee group by department order by avg(experience) desc limit 1;
++------------+-----------------+
+| department | avg(experience) |
++------------+-----------------+
+| HR         |         12.6667 |
++------------+-----------------+
+19.Find gender and department combinations where total salary is above 100000.
+mysql> select department,gender,sum(salary) from employee group by department,gender having sum(salary)>100000;
++------------+--------+-------------+
+| department | gender | sum(salary) |
++------------+--------+-------------+
+| HR         | Female |   105000.00 |
+| Finance    | Male   |   179000.00 |
+| IT         | Male   |   209000.00 |
+| IT         | Female |   147000.00 |
+| Marketing  | Female |   103000.00 |
++------------+--------+-------------+
+20.Show department-wise count of employees under age 35.
+mysql> select department,count(age) from employee where age<35 group by department;
++------------+------------+
+| department | count(age) |
++------------+------------+
+| HR         |          1 |
+| Finance    |          3 |
+| IT         |          5 |
+| Marketing  |          1 | 
++------------+------------+
+21.List top 3 departments with highest total salary.
+mysql> select department,sum(salary) from employee group by department order by sum(salary) desc limit 3;
++------------+-------------+
+| department | sum(salary) |
++------------+-------------+
+| IT         |   356000.00 |
+| Finance    |   241000.00 |
+| Marketing  |   155000.00 |
++------------+-------------+
+22.List departments where all employees have more than 5 years of experience.
+mysql> select department,sum(experience) from employee group by department having sum(experience)>5;
++------------+-----------------+
+| department | sum(experience) |
++------------+-----------------+
+| HR         |              38 |
+| Finance    |              20 |
+| IT         |              36 |
+| Marketing  |              23 |
++------------+-----------------+
+23.Find departments where at least one employee earns less than 55000.
+mysql> select department from employee where salary<55000;
++------------+
+| department |
++------------+
+| HR         |
+| HR         |
+| Marketing  |
+| Marketing  |
+| Marketing  |
++------------+
