@@ -1,0 +1,214 @@
+INNER JOIN
+1.List all employees along with their department names.
+  mysql> select employees.name,departments.department_name
+    -> from employees
+    -> join departments
+    -> on employees.department_id=departments.department_id;
++---------+-----------------+
+| name    | department_name |
++---------+-----------------+
+| Alice   | HR              |
+| Bob     | IT              |
+| Charlie | HR              |
+| David   | Finance         |
+| Frank   | Sales           |
+| Grace   | IT              |
++---------+-----------------+
+2.Show the names of employees who work in the IT department.
+  mysql> select employees.name,departments.department_name
+    -> from employees
+    -> join departments
+    -> on employees.department_id=departments.department_id
+    -> where departments.department_name='IT';
++-------+-----------------+
+| name  | department_name |
++-------+-----------------+
+| Bob   | IT              |
+| Grace | IT              |
++-------+-----------------+
+3.Get the names and locations of departments where at least one employee works.
+  mysql> select departments.location,count(employees.name)
+    -> from employees
+    -> join departments
+    -> on employees.department_id=departments.department_id
+    -> group by departments.location
+    -> having count(employees.name)>=1;
++---------------+-----------------------+
+| location      | count(employees.name) |
++---------------+-----------------------+
+| New York      |                     2 |
+| San Francisco |                     2 |
+| Chicago       |                     1 |
+| Boston        |                     1 |
++---------------+-----------------------+
+4.Find employees who work in the same location as the 'HR' department.
+mysql> select employees.name,departments.location
+    -> from employees
+    -> join departments
+    -> on employees.department_id= departments.department_id
+    -> where departments.location='HR';
+Empty set (0.01 sec)
+5.List department names and employee count (only departments with employees).
+  mysql> select departments.department_name,count(employees.name)
+    -> from employees
+    -> join departments
+    -> on employees.department_id= departments.department_id
+    -> group by departments.department_name;
++-----------------+-----------------------+
+| department_name | count(employees.name) |
++-----------------+-----------------------+
+| HR              |                     2 |
+| IT              |                     2 |
+| Finance         |                     1 |
+| Sales           |                     1 |
++-----------------+-----------------------+
+
+LEFT JOIN
+6.List all employees and their departments (even if they don’t belong to any department).
+  mysql> select employees.name,departments.department_name from employees left join departments on employees.department_id=departments.department_id;
++---------+-----------------+
+| name    | department_name |
++---------+-----------------+
+| Alice   | HR              |
+| Bob     | IT              |
+| Charlie | HR              |
+| David   | Finance         |
+| Eve     | NULL            |
+| Frank   | Sales           |
+| Grace   | IT              |
+| Hannah  | NULL            |
++---------+-----------------+
+7.Find employees who are not assigned to any department.
+  mysql> select employees.name,departments.department_name from employees left join departments on employees.department_id=departments.department_id where departments.department_name is null;
++--------+-----------------+
+| name   | department_name |
++--------+-----------------+
+| Eve    | NULL            |
+| Hannah | NULL            |
++--------+-----------------+
+8.List all departments and the names of employees working in them (include departments without employees).
+  mysql> select employees.name,departments.department_name from employees left join departments on employees.department_id=departments.department_id;
++---------+-----------------+
+| name    | department_name |
++---------+-----------------+
+| Alice   | HR              |
+| Bob     | IT              |
+| Charlie | HR              |
+| David   | Finance         |
+| Eve     | NULL            |
+| Frank   | Sales           |
+| Grace   | IT              |
+| Hannah  | NULL            |
++---------+-----------------+
+
+9.Show employee names and department names, replacing NULLs with 'Unassigned'.
+  mysql> select employees.name,
+    -> case
+    -> when departments.department_name='NULL' then 'Unassigned'
+    -> else departments.department_name
+    -> end as new from employees left join departments on
+    -> employees.department_id=departments.department_id;
++---------+---------+
+| name    | new     |
++---------+---------+
+| Alice   | HR      |
+| Bob     | IT      |
+| Charlie | HR      |
+| David   | Finance |
+| Eve     | NULL    |
+| Frank   | Sales   |
+| Grace   | IT      |
+| Hannah  | NULL    |
++---------+---------+
+10.Find departments where no employees are assigned.
+   mysql> select departments.department_name from departments left join employees on departments.department_id= employees.department_id where employees.department_id is null;
++-----------------+
+| department_name |
++-----------------+
+| Marketing       |
++-----------------+
+
+RIGHT JOIN (use LEFT JOIN with reversed tables if using SQLite/MySQL)
+11.Show all departments and the employees working in them (even if no employees).
+   mysql> select employees.name,departments.department_name from employees right join departments on  employees.department_id=departments.department_id;
++---------+-----------------+
+| name    | department_name |
++---------+-----------------+
+| Charlie | HR              |
+| Alice   | HR              |
+| Grace   | IT              |
+| Bob     | IT              |
+| David   | Finance         |
+| Frank   | Sales           |
+| NULL    | Marketing       |
++---------+-----------------+
+12.List all employees and their department locations.
+   mysql> select employees.name,departments.location from employees right join departments on  employees.department_id=departments.department_id;
++---------+---------------+
+| name    | location      |
++---------+---------------+
+| Charlie | New York      |
+| Alice   | New York      |
+| Grace   | San Francisco |
+| Bob     | San Francisco |
+| David   | Chicago       |
+| Frank   | Boston        |
+| NULL    | Los Angeles   |
++---------+---------------+
+
+group by FULL OUTER JOIN (Emulated in MySQL using UNION of LEFT and RIGHT JOIN)
+13.List all employees and departments, even if they don't match.
+   mysql> Select employees.name,departments.department_name from employees left join departments on employees.department_id=departments.department_id union select employees.name,departments.department_name from employees right join departments on employees.department_id=departments.department_id;
++---------+-----------------+
+| name    | department_name |
++---------+-----------------+
+| Alice   | HR              |
+| Bob     | IT              |
+| Charlie | HR              |
+| David   | Finance         |
+| Eve     | NULL            |
+| Frank   | Sales           |
+| Grace   | IT              |
+| Hannah  | NULL            |
+| NULL    | Marketing       |
++---------+-----------------+
+14.Show which employees or departments are missing a match.
+   mysql> select employees.name,departments.department_name from employees left join departments on employees.department_id=departments.department_id where departments.department_id is null union select employees.name,departments.department_name from employees right join departments on employees.department_id=departments.department_id where employees.department_id is null;
++--------+-----------------+
+| name   | department_name |
++--------+-----------------+
+| Eve    | NULL            |
+| Hannah | NULL            |
+| NULL   | Marketing       |
++--------+-----------------+
+
+SELF JOIN
+15.Find all pairs of employees who work in the same department.
+16.List employees along with their colleagues in the same department (exclude self).
+
+CROSS JOIN
+19.List all possible employee-department combinations.
+   mysql> select * from employees cross join departments on employees.department_id=departments.department_id;
++--------+---------+---------------+--------+---------------+-----------------+---------------+
+| emp_id | name    | department_id | salary | department_id | department_name | location      |
++--------+---------+---------------+--------+---------------+-----------------+---------------+
+|      1 | Alice   |           101 |  60000 |           101 | HR              | New York      |
+|      2 | Bob     |           102 |  55000 |           102 | IT              | San Francisco |
+|      3 | Charlie |           101 |  70000 |           101 | HR              | New York      |
+|      4 | David   |           103 |  48000 |           103 | Finance         | Chicago       |
+|      6 | Frank   |           104 |  52000 |           104 | Sales           | Boston        |
+|      7 | Grace   |           102 |  58000 |           102 | IT              | San Francisco |
++--------+---------+---------------+--------+---------------+-----------------+---------------+
+20.Count how many total combinations of employees and departments exist
+  mysql> select count(*) from employees cross join departments on employees.department_id=departments.department_id;
++----------+
+| count(*) |
++----------+
+|        6 |
++----------+
+
+
+
+
+
+
